@@ -3,12 +3,12 @@ namespace oomtm450PuckMod_MatcheS {
         /// <summary>
         /// Const string, name of the mod on the workshop.
         /// </summary>
-        internal const string WORKSHOP_MOD_NAME = "MatcheS";
+        internal const string WORKSHOP_MOD_NAME = "MatcheS Mod";
 
         /// <summary>
         /// Const string, name of the mod.
         /// </summary>
-        internal const string MOD_NAME = "oomtm450_template";
+        internal const string MOD_NAME = "oomtm450_matches";
 
         /// <summary>
         /// Const string, used for the communication from the server.

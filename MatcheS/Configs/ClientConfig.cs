@@ -5,7 +5,7 @@ using System.IO;
 
 namespace oomtm450PuckMod_MatcheS.Configs {
     /// <summary>
-    /// Class containing the configuration from oomtm450_template_clientconfig.json used for this mod.
+    /// Class containing the configuration from oomtm450_matches_clientconfig.json used for this mod.
     /// </summary>
     public class ClientConfig : IConfig {
         #region Constants

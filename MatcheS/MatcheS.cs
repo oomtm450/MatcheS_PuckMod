@@ -4,8 +4,6 @@ using oomtm450PuckMod_MatcheS.SystemFunc;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Reflection;
-using Unity.Netcode;
 
 namespace oomtm450PuckMod_MatcheS {
     /// <summary>
@@ -42,6 +40,13 @@ namespace oomtm450PuckMod_MatcheS {
         /// Bool, true if the mod has been patched in.
         /// </summary>
         private static bool _harmonyPatched = false;
+
+        /// <summary>
+        /// LockDictionary of string and ChatMessage and DateTime, dictionnary of the last message of every player in the current session.
+        /// </summary>
+        private static readonly LockDictionary<string, (ChatMessage ChatMessage, DateTime DateTime)> _lastMessages = new LockDictionary<string, (ChatMessage, DateTime)>();
+
+        private static string _localPlayerSteamId = "";
         #endregion
 
         #region Properties
@@ -50,6 +55,49 @@ namespace oomtm450PuckMod_MatcheS {
         /// </summary>
         internal static Configs.ClientConfig ClientConfig { get; set; } = new Configs.ClientConfig();
         #endregion
+
+        /// <summary>
+        /// Class that patches the AddChatMessage function from ChatManager.
+        /// </summary>
+        [HarmonyPatch(typeof(ChatManager), nameof(ChatManager.AddChatMessage))]
+        public class ChatManager_AddChatMessage_Patch {
+            [HarmonyPrefix]
+            public static bool Prefix(ChatMessage chatMessage) {
+                try {
+                    if (chatMessage.IsSystem)
+                        return true;
+
+                    string chatMessageSteamId = chatMessage.SteamID.Value.ToString();
+
+                    if (string.IsNullOrEmpty(_localPlayerSteamId))
+                        _localPlayerSteamId = PlayerManager.Instance.GetLocalPlayer().SteamId.Value.ToString();
+
+                    if (string.IsNullOrEmpty(_localPlayerSteamId))
+                        return true;
+
+                    if (chatMessage.SteamID.Value.ToString() == _localPlayerSteamId)
+                        return true;
+
+                    DateTime now = DateTime.UtcNow;
+
+                    if (!_lastMessages.TryGetValue(chatMessageSteamId, out var lastChatMessage)) {
+                        _lastMessages.Add(chatMessageSteamId, (chatMessage, now));
+                        return true;
+                    }
+
+                    if (chatMessage.IsTeamChat == lastChatMessage.ChatMessage.IsTeamChat &&
+                        chatMessage.Content == lastChatMessage.ChatMessage.Content &&
+                        (now - lastChatMessage.DateTime).TotalMilliseconds < ClientConfig.SpamMillisecondsThreshold) {
+                        return false;
+                    }
+                }
+                catch (Exception ex) {
+                    Logging.LogError($"Error in {nameof(ChatManager_AddChatMessage_Patch)} Prefix().\n{ex}", ClientConfig);
+                }
+
+                return true;
+            }
+        }
 
         /// <summary>
         /// Method that launches when the mod is being enabled.

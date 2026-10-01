@@ -29,6 +29,11 @@ namespace oomtm450PuckMod_MatcheS.Configs {
         public bool LogInfo { get; set; } = true;
 
         /// <summary>
+        /// Int, number of milliseconds before not blocking the same message from the same player.
+        /// </summary>
+        public int SpamMillisecondsThreshold { get; set; } = 3000;
+
+        /// <summary>
         /// String, name of the mod.
         /// </summary>
         [JsonIgnore]

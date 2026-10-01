@@ -1,4 +1,4 @@
-﻿namespace oomtm450PuckMod_Template.SystemFunc {
+﻿namespace oomtm450PuckMod_MatcheS.SystemFunc {
     /// <summary>
     /// Class containing code for team functions.
     /// </summary>

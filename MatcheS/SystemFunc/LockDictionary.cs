@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 
-namespace oomtm450PuckMod_Template {
+namespace oomtm450PuckMod_MatcheS {
     /// <summary>
     /// Class containing a dictionary with an integrated lock for easier async unsafe thread code management.
     /// </summary>

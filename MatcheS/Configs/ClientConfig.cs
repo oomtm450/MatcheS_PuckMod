@@ -1,9 +1,9 @@
 ﻿using Newtonsoft.Json;
-using oomtm450PuckMod_Template.SystemFunc;
+using oomtm450PuckMod_MatcheS.SystemFunc;
 using System;
 using System.IO;
 
-namespace oomtm450PuckMod_Template.Configs {
+namespace oomtm450PuckMod_MatcheS.Configs {
     /// <summary>
     /// Class containing the configuration from oomtm450_template_clientconfig.json used for this mod.
     /// </summary>

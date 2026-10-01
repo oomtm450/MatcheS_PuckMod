@@ -1,9 +1,9 @@
-namespace oomtm450PuckMod_Template {
+namespace oomtm450PuckMod_MatcheS {
     public static class Constants {
         /// <summary>
         /// Const string, name of the mod on the workshop.
         /// </summary>
-        internal const string WORKSHOP_MOD_NAME = "Template";
+        internal const string WORKSHOP_MOD_NAME = "MatcheS";
 
         /// <summary>
         /// Const string, name of the mod.

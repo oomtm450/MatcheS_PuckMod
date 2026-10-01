@@ -1,4 +1,4 @@
-﻿namespace oomtm450PuckMod_Template.Configs {
+﻿namespace oomtm450PuckMod_MatcheS.Configs {
     /// <summary>
     /// Class containing the interface for configurations.
     /// </summary>

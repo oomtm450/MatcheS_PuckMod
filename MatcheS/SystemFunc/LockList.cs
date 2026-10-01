@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace oomtm450PuckMod_Template {
+namespace oomtm450PuckMod_MatcheS {
     /// <summary>
     /// Class containing a list with an integrated lock for easier async unsafe thread code management.
     /// </summary>

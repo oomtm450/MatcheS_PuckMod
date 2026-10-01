@@ -2,7 +2,7 @@ using System;
 using System.Diagnostics;
 using System.Threading;
 
-namespace oomtm450PuckMod_Template {
+namespace oomtm450PuckMod_MatcheS {
     public class PausableTimer : IDisposable {
         private readonly Timer _timer;
         private readonly Stopwatch _stopwatch = new Stopwatch();

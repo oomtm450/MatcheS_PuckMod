@@ -1,7 +1,7 @@
-﻿using oomtm450PuckMod_Template.Configs;
+﻿using oomtm450PuckMod_MatcheS.Configs;
 using UnityEngine;
 
-namespace oomtm450PuckMod_Template.SystemFunc {
+namespace oomtm450PuckMod_MatcheS.SystemFunc {
     /// <summary>
     /// Class containing code for logging.
     /// </summary>

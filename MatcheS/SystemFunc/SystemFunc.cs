@@ -3,7 +3,7 @@ using System.Linq;
 using System.Reflection;
 using UnityEngine;
 
-namespace oomtm450PuckMod_Template.SystemFunc {
+namespace oomtm450PuckMod_MatcheS.SystemFunc {
     public static class SystemFunc {
         public static T GetPrivateField<T>(Type typeContainingField, object instanceOfType, string fieldName) {
             if (instanceOfType == null)

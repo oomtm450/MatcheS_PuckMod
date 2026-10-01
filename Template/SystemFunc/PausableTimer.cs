@@ -1,0 +1,70 @@
+using System;
+using System.Diagnostics;
+using System.Threading;
+
+namespace oomtm450PuckMod_Template {
+    public class PausableTimer : IDisposable {
+        private readonly Timer _timer;
+        private readonly Stopwatch _stopwatch = new Stopwatch();
+        private readonly Action _callback;
+        private bool _callbackCalled = false;
+        private long _intervalMilliseconds;
+        private bool _isRunning = false;
+
+        public long MillisecondsLeft => _intervalMilliseconds - _stopwatch.ElapsedMilliseconds;
+
+        public PausableTimer(Action callback, long intervalMilliseconds) {
+            _callback = callback ?? throw new ArgumentNullException(nameof(callback));
+            _intervalMilliseconds = intervalMilliseconds;
+            // Initialize the internal timer, but don't start its period yet.
+            _timer = new Timer(TimerCallback, null, Timeout.Infinite, Timeout.Infinite);
+        }
+
+        public void Start() {
+            if (_isRunning)
+                return;
+
+            _stopwatch.Start();
+            // Start the internal timer with the specified interval
+            _timer.Change(_intervalMilliseconds - _stopwatch.ElapsedMilliseconds, Timeout.Infinite);
+            _isRunning = true;
+        }
+
+        public void Pause() {
+            if (!_isRunning)
+                return;
+
+            _stopwatch.Stop();
+            // Stop the internal timer from firing again by setting period to Infinite
+            _timer.Change(Timeout.Infinite, Timeout.Infinite);
+            _isRunning = false;
+        }
+
+        public void Reset() {
+            _stopwatch.Reset();
+            Pause(); // Pause also sets isRunning to false
+        }
+
+        public void AddTime(long milliseconds) {
+            _intervalMilliseconds += milliseconds;
+            Pause();
+            Start();
+        }
+
+        public void TimerCallback(object state) {
+            // This is where your custom logic goes.
+            // It's called when the interval elapses.
+            _callbackCalled = true;
+            _callback.Invoke();
+        }
+
+        public bool TimerEnded() {
+            return _callbackCalled;
+        }
+
+        public void Dispose() {
+            _timer?.Dispose();
+            _stopwatch?.Stop();
+        }
+    }
+}

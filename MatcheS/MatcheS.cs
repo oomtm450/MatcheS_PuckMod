@@ -96,15 +96,6 @@ namespace oomtm450PuckMod_MatcheS {
                     if (chatMessage.IsTeamChat == lastChatMessage.ChatMessage.IsTeamChat &&
                         chatMessage.Content.ToString() == lastChatMessage.ChatMessage.Content.ToString() &&
                         (now - lastChatMessage.DateTime).TotalMilliseconds < ClientConfig.SpamMillisecondsThreshold) {
-                        try {
-                            SystemFunc.SystemFunc.AddClientChatMessage($"Blocked {chatMessage.Username.Value.ToString()} : {chatMessage.Content.ToString()}");
-                        }
-                        catch {
-                            try {
-                                SystemFunc.SystemFunc.AddClientChatMessage($"Blocked : {chatMessage.Content.ToString()}");
-                            }
-                            catch { }
-                        }
                         return false;
                     }
 

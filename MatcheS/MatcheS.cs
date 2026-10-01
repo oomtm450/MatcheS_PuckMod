@@ -57,25 +57,33 @@ namespace oomtm450PuckMod_MatcheS {
         #endregion
 
         /// <summary>
-        /// Class that patches the AddChatMessage function from ChatManager.
+        /// Class that patches the AddChatMessage function from UIChat.
         /// </summary>
-        [HarmonyPatch(typeof(ChatManager), nameof(ChatManager.AddChatMessage))]
-        public class ChatManager_AddChatMessage_Patch {
+        [HarmonyPatch(typeof(UIChat), nameof(UIChat.AddChatMessage))]
+        public class UIChat_AddChatMessage_Patch {
             [HarmonyPrefix]
-            public static bool Prefix(ChatMessage chatMessage) {
+            [HarmonyPriority(Priority.VeryHigh)]
+            public static bool Prefix(ChatMessage chatMessage, Units units, bool filterProfanity) {
                 try {
-                    if (chatMessage.IsSystem)
+                    string chatMessageSteamId = "";
+                    try {
+                        chatMessageSteamId = chatMessage.SteamID.Value.ToString();
+                    }
+                    catch {
+                        return true;
+                    }
+
+                    if (string.IsNullOrEmpty(chatMessageSteamId))
                         return true;
 
-                    string chatMessageSteamId = chatMessage.SteamID.Value.ToString();
-
-                    if (string.IsNullOrEmpty(_localPlayerSteamId))
+                    if (string.IsNullOrEmpty(_localPlayerSteamId)) {
                         _localPlayerSteamId = PlayerManager.Instance.GetLocalPlayer().SteamId.Value.ToString();
 
-                    if (string.IsNullOrEmpty(_localPlayerSteamId))
-                        return true;
+                        if (string.IsNullOrEmpty(_localPlayerSteamId))
+                            return true;
+                    }
 
-                    if (chatMessage.SteamID.Value.ToString() == _localPlayerSteamId)
+                    if (chatMessageSteamId == _localPlayerSteamId)
                         return true;
 
                     DateTime now = DateTime.UtcNow;
@@ -86,15 +94,16 @@ namespace oomtm450PuckMod_MatcheS {
                     }
 
                     if (chatMessage.IsTeamChat == lastChatMessage.ChatMessage.IsTeamChat &&
-                        chatMessage.Content == lastChatMessage.ChatMessage.Content &&
+                        chatMessage.Content.ToString() == lastChatMessage.ChatMessage.Content.ToString() &&
                         (now - lastChatMessage.DateTime).TotalMilliseconds < ClientConfig.SpamMillisecondsThreshold) {
+                        SystemFunc.SystemFunc.AddClientChatMessage($"Blocked {chatMessage.Username.Value.ToString()} : {chatMessage.Content.ToString()}");
                         return false;
                     }
 
                     _lastMessages.AddOrUpdate(chatMessageSteamId, (chatMessage, now));
                 }
                 catch (Exception ex) {
-                    Logging.LogError($"Error in {nameof(ChatManager_AddChatMessage_Patch)} Prefix().\n{ex}", ClientConfig);
+                    Logging.LogError($"Error in {nameof(UIChat_AddChatMessage_Patch)} Prefix().\n{ex}", ClientConfig);
                 }
 
                 return true;

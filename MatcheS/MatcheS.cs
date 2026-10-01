@@ -90,6 +90,8 @@ namespace oomtm450PuckMod_MatcheS {
                         (now - lastChatMessage.DateTime).TotalMilliseconds < ClientConfig.SpamMillisecondsThreshold) {
                         return false;
                     }
+
+                    _lastMessages.AddOrUpdate(chatMessageSteamId, (chatMessage, now));
                 }
                 catch (Exception ex) {
                     Logging.LogError($"Error in {nameof(ChatManager_AddChatMessage_Patch)} Prefix().\n{ex}", ClientConfig);

@@ -14,7 +14,7 @@ namespace oomtm450PuckMod_MatcheS {
         /// <summary>
         /// Const string, version of the mod.
         /// </summary>
-        private const string MOD_VERSION = "1.0.0";
+        private const string MOD_VERSION = "1.0.1";
 
         /// <summary>
         /// ReadOnlyCollection of string, last released versions of the mod.
@@ -42,10 +42,13 @@ namespace oomtm450PuckMod_MatcheS {
         private static bool _harmonyPatched = false;
 
         /// <summary>
-        /// LockDictionary of string and ChatMessage and DateTime, dictionnary of the last message of every player in the current session.
+        /// LockDictionary of string and ChatMsg, dictionnary of the last message of every player in the current session.
         /// </summary>
-        private static readonly LockDictionary<string, (ChatMessage ChatMessage, DateTime DateTime)> _lastMessages = new LockDictionary<string, (ChatMessage, DateTime)>();
+        private static readonly LockDictionary<string, ChatMsg> _lastMessages = new LockDictionary<string, ChatMsg>();
 
+        /// <summary>
+        /// String, steamId of the client using the mod (to not remove spammed messages of client player).
+        /// </summary>
         private static string _localPlayerSteamId = "";
         #endregion
 
@@ -86,23 +89,45 @@ namespace oomtm450PuckMod_MatcheS {
                     if (chatMessageSteamId == _localPlayerSteamId)
                         return true;
 
-                    DateTime now = DateTime.UtcNow;
-
                     if (!_lastMessages.TryGetValue(chatMessageSteamId, out var lastChatMessage)) {
-                        _lastMessages.Add(chatMessageSteamId, (chatMessage, now));
+                        _lastMessages.Add(chatMessageSteamId, new ChatMsg(chatMessage.Content.Value.ToString(), chatMessage.IsTeamChat));
                         return true;
                     }
 
-                    if (chatMessage.IsTeamChat == lastChatMessage.ChatMessage.IsTeamChat &&
-                        chatMessage.Content.ToString() == lastChatMessage.ChatMessage.Content.ToString() &&
-                        (now - lastChatMessage.DateTime).TotalMilliseconds < ClientConfig.SpamMillisecondsThreshold) {
+                    if (chatMessage.IsTeamChat == lastChatMessage.IsTeamChat &&
+                        chatMessage.Content.Value.ToString() == lastChatMessage.Message &&
+                        (DateTime.UtcNow - lastChatMessage.DateTime).TotalMilliseconds < ClientConfig.SpamMillisecondsThreshold) {
                         return false;
                     }
 
-                    _lastMessages.AddOrUpdate(chatMessageSteamId, (chatMessage, now));
+                    _lastMessages.AddOrUpdate(chatMessageSteamId, new ChatMsg(chatMessage.Content.Value.ToString(), chatMessage.IsTeamChat));
                 }
                 catch (Exception ex) {
                     Logging.LogError($"Error in {nameof(UIChat_AddChatMessage_Patch)} Prefix().\n{ex}", ClientConfig);
+                }
+
+                return true;
+            }
+        }
+
+        /// <summary>
+        /// Class that patches the OnGameStateChanged event from BaseGameMode.
+        /// </summary>
+        [HarmonyPatch(typeof(BaseGameMode<BaseGameModeConfig>), "OnGameStateChanged")]
+        public class BaseGameMode_OnGameStateChanged_Patch {
+            [HarmonyPrefix]
+            public static bool Prefix(GameState oldGameState, GameState newGameState) {
+                try {
+                    if (oldGameState.Phase == newGameState.Phase)
+                        return true;
+
+                    if (newGameState.Phase != GamePhase.PreGame)
+                        return true;
+
+                    _lastMessages.Clear();
+                }
+                catch (Exception ex) {
+                    Logging.LogError($"Error in {nameof(BaseGameMode_OnGameStateChanged_Patch)} Prefix().\n{ex}", ClientConfig);
                 }
 
                 return true;
@@ -155,6 +180,19 @@ namespace oomtm450PuckMod_MatcheS {
                 Logging.LogError($"Failed to disable.\n{ex}", new Configs.ClientConfig());
                 return false;
             }
+        }
+    }
+
+    internal class ChatMsg {
+        internal string Message { get; set; } = "";
+
+        internal DateTime DateTime { get; set; } = DateTime.UtcNow;
+
+        internal bool IsTeamChat { get; set; } = false;
+
+        internal ChatMsg(string message, bool isTeamChat) {
+            Message = message;
+            IsTeamChat = isTeamChat;
         }
     }
 }
